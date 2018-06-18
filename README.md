@@ -60,38 +60,60 @@ With this histogram I am adding up the pixel values along each column in the ima
 
 ## Image pipe Line final
 Here is the ouput of the pipe line used on the sample image.
+
 Apply undistorion to the image
+
     image = cal_undistort(img_c, objpoints, imgpoints)
 apply sobel threshold 
+
     gradx = abs_sobel_thresh(image, orient='x', sobel_kernel=3, thresh=(15, 255))
     grady = abs_sobel_thresh(image, orient='y', sobel_kernel=3, thresh=(35, 255))
+    
 Apply Magnitude and direction threshold
+
     mag_binary = mag_thresh(image, sobel_kernel=9, mag_thresh=(60, 255))
     dir_binary = dir_threshold(image, sobel_kernel=9, thresh=(0.7, 1.1))
 Apply Color tresholding using HSL color space
+
     color = color_thresholds(image)
+    
 Combine threshold images and get a binary images , which should contain the lane lines
+
     combined = np.zeros_like(img_g)
     combined[(gradx == 1) & (grady == 1) & (mag_binary == 1) | (color == 1) | (mag_binary == 1) & (dir_binary == 1)] = 1
+    
 Perform birdEye view transformation
+
     birds , Minv = birds_eye(combined, display=False)
+    
 Apply the Sliding window search to get the Lanes
+
     windows_img, ploty, left_fitx, right_fitx, left_fit, right_fit, leftx, rightx, leftx_base, rightx_base = sliding_windows(birds)
 Obtain curveature of the road
+
     left_curverad = roc_in_meters(ploty, left_fit, right_fit, leftx, rightx)
+    
 Get the camera position
+
     center_pos =  pos_center(img.shape[1]/2,leftx_base,rightx_base)
     annotate(img, left_curverad,  center_pos)
+    
 Draw lines
+
     result = draw_lane(img ,birds,left_fit, right_fit, Minv)
 
 Obtain the following results
+
 ![alt text][final]
 ## Video Processing Pipeline
 
 
 ## Discussion
 # Problems encountered and Outlook
-Getting the pipeline to be robust against shadows and at the same time capable of detecting yellow lane lines on white ground was the greates difficulty. I took the approach that lines should never have very low saturation values, i.e. be black. Setting a minimal value for the saturation helped when paired with the x gradient and absolute gradient threshold. Problematic is also the case when more than two lanes get detected. For lines detected far away a threshold on the distance eliminated the problem. By far the most work was implementing the logic of a continuous update of detected lines as well as restarting when the buffer of previous lines emptied. At the moment the pipeline will likely fail as soon as more (spurious) lines are on the same lane, as e.g. in the first challenge video. This could be solved by building separate lane line detectors for yellow and white together with additional logic which line to choose.
+Getting the pipeline to be robust against shadows and at the same time capable of detecting yellow lane lines on white ground was really challenging.
+I think the pipeline would fail sicne we have a constant approche forimage thresholding , i think implmenting a dynamic method for image tretholding and lane identification is really to have a valid working pipeline in all conditions.
+One more issue i think my pipeline is abit slow optimization in the pipe line is needed , probably usign smaller image lower frame rate, could give us better results.
+
+
 
 
