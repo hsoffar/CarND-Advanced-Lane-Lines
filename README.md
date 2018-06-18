@@ -1,6 +1,12 @@
 ## Advanced Lane Finding
 [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
+[BIRDEYE]: ./pictures/birdeye.jpg "BIRDEYE"
+[calib]: ./pictures/calib.jpg "calib.jpg"
+[colortres]: ./pictures/colortres.jpg "colortres"
+[final]: ./pictures/final.jpg "final"
+[sliding]: ./pictures/sliding.jpg "sliding"
+[undist]: ./pictures/undist.jpg "undist"
 
 In this project, your goal is to write a software pipeline to identify the lane boundaries in a video, but the main output or product we want you to create is a detailed writeup of the project.  Check out the [writeup template](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup.  
 
@@ -24,7 +30,7 @@ To help the reviewer examine your work, please save examples of the output from 
 
 ## Camera calibration
 every camera comes with a little bit of distortion in the images it puts out. Since each camera's distortion can be different, a calibration must be done in order to correct the image and make it appear as in the real-world, undistorted. Luckily, OpenCV provides an easy way to do so using chessboard images taken by the camera. I pulled in some of Udacity's provided chessboard images from their camera to begin with.
-
+![alt text][calib]
 Using cv2.findChessboardCorners, the corners points are stored in an array imgpoints for each calibration image where the chessboard could be found. The object points will always be the same as the known coordinates of the chessboard with zero as 'z' coordinate because the chessboard is flat. The object points are stored in an array called objpoints. I then used the output objpoints and imgpoints to compute the camera calibration and distortion coefficients using the cv2.calibrateCamera function.
 
 We start by preparing "object points", which are (x, y, z) coordinates of the chessboard corners in the world (assuming coordinates such that z=0). Thus, objp is just a replicated array of coordinates, and objpoints will be appended with a copy of it every time I successfully detect all chessboard corners in a test image. imgpoints will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.
@@ -33,15 +39,18 @@ objpoints and imgpoints are then used to compute the camera calibration and dist
 
 ## distortion 
 Applying the undistortion transformation to a test image yields the following result (left distorted, right corrected) 
-
+![alt text][undist]
 ## Binary lane line image using gradient and color transforms
 
-
+![alt text][colortres]
 ## Perspective Transform to bird's eye view
-
+![alt text][BIRDEYE]
 ## Identifying lane line pixels using sliding windows
+![alt text][sliding]
 
+## Image pipe Line final
 
+![alt text][final]
 ## Video Processing Pipeline
 
 
