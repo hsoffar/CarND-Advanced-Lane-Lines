@@ -106,10 +106,9 @@ Obtain the following results
 
 ![alt text][final]
 ## Video Processing Pipeline
-
+The idea is to read the video stream as seperate images , and process each image then combine them back to a video stream.
 
 ## Discussion
-# Problems encountered and Outlook
 Getting the pipeline to be robust against shadows and at the same time capable of detecting yellow lane lines on white ground was really challenging.
 I think the pipeline would fail sicne we have a constant approche forimage thresholding , i think implmenting a dynamic method for image tretholding and lane identification is really to have a valid working pipeline in all conditions.
 One more issue i think my pipeline is abit slow optimization in the pipe line is needed , probably usign smaller image lower frame rate, could give us better results.
