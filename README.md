@@ -37,19 +37,55 @@ We start by preparing "object points", which are (x, y, z) coordinates of the ch
 
 objpoints and imgpoints are then used to compute the camera calibration and distortion coefficients using the cv2.calibrateCamera() function. I applied this distortion correction to the test image using the cv2.undistort() function and obtained this result:
 
-## distortion 
+## Distortion 
 Applying the undistortion transformation to a test image yields the following result (left distorted, right corrected) 
 ![alt text][undist]
 ## Binary lane line image using gradient and color transforms
-
+I explored several combinations of sobel gradient thresholds and color channel thresholds in multiple color spaces. These are shown clearly in the project Jupyter notebook(pipeline). Below is an example of the combination of sobel magnitude and direction thresholds and HSL tresholding, the porpuse of this step was to obrain clear driving lane lines.
 ![alt text][colortres]
 ## Perspective Transform to bird's eye view
+The Birds_eye() function takes as inputs an image (img), as well as source (src) and destination (dst) points. I chose to hardcode the source and destination points in the following manner:
+  src = np.float32([[490, 482],[810, 482],
+                      [1250, 720],[40, 720]])
+    dst = np.float32([[0, 0], [1280, 0], 
+                     [1250, 720],[40, 720]])
+The goal of this step is to transform the undistorted image to a "birds eye view" of the road which focuses only on the lane lines and displays them in such a way that they appear to be relatively parallel to eachother (as opposed to the converging lines you would normally see). To achieve the perspective transformation I first applied the OpenCV functions getPerspectiveTransform and warpPerspective which take a matrix of four source points on the undistorted image and remaps them to four destination points on the warped image. The source and destination points were selected manually by visualizing the locations of the lane lines on a series of test images.
 ![alt text][BIRDEYE]
 ## Identifying lane line pixels using sliding windows
+After applying calibration, thresholding, and a perspective transform to a road image, you should have a binary image where the lane lines stand out clearly. However, you still need to decide explicitly which pixels are part of the lines and which belong to the left line and which belong to the right line.
+I first take a histogram along all the columns in the lower half of the image , to clearly identify the lane pixels or the point where we should start searching with the sliding window method.
+Sliding Window
+With this histogram I am adding up the pixel values along each column in the image. In my thresholded binary image, pixels are either 0 or 1, so the two most prominent peaks in this histogram will be good indicators of the x-position of the base of the lane lines. I can use that as a starting point for where to search for the lines. From that point, I can use a sliding window, placed around the line centers, to find and follow the lines up to the top of the frame.
 ![alt text][sliding]
 
 ## Image pipe Line final
+Here is the ouput of the pipe line used on the sample image.
+Apply undistorion to the image
+    image = cal_undistort(img_c, objpoints, imgpoints)
+apply sobel threshold 
+    gradx = abs_sobel_thresh(image, orient='x', sobel_kernel=3, thresh=(15, 255))
+    grady = abs_sobel_thresh(image, orient='y', sobel_kernel=3, thresh=(35, 255))
+Apply Magnitude and direction threshold
+    mag_binary = mag_thresh(image, sobel_kernel=9, mag_thresh=(60, 255))
+    dir_binary = dir_threshold(image, sobel_kernel=9, thresh=(0.7, 1.1))
+Apply Color tresholding using HSL color space
+    color = color_thresholds(image)
+Combine threshold images and get a binary images , which should contain the lane lines
+    combined = np.zeros_like(img_g)
+    combined[(gradx == 1) & (grady == 1) & (mag_binary == 1) | (color == 1) | (mag_binary == 1) & (dir_binary == 1)] = 1
+Perform birdEye view transformation
+    birds , Minv = birds_eye(combined, display=False)
+Apply the Sliding window search to get the Lanes
+    windows_img, ploty, left_fitx, right_fitx, left_fit, right_fit, leftx, rightx, leftx_base, rightx_base = sliding_windows(birds)
+Obtain curveature of the road
+    left_curverad = roc_in_meters(ploty, left_fit, right_fit, leftx, rightx)
+Get the camera position
+    center_pos =  pos_center(img.shape[1]/2,leftx_base,rightx_base)
+    annotate(img, left_curverad,  center_pos)
+Draw lines
+    result = draw_lane(img ,birds,left_fit, right_fit, Minv)
 
+Obtain the following results
 ![alt text][final]
 ## Video Processing Pipeline
 
